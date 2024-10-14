@@ -1,0 +1,3 @@
+fastapi
+inference_sdk
+uvicorn
