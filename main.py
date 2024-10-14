@@ -1,6 +1,3 @@
-# Install necessary dependencies:
-# pip install fastapi uvicorn[standard] pillow ultralytics
-
 from fastapi import FastAPI, File, UploadFile, HTTPException, Request
 from fastapi.responses import JSONResponse
 from PIL import Image
@@ -9,12 +6,16 @@ import time
 import logging
 from functools import wraps
 from inference_sdk import InferenceHTTPClient
+import os
+
+# Get API key from environment variable
+API_KEY = os.getenv("API_KEY", "default_key")
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
 
-# Initialize the Inference client
-CLIENT = InferenceHTTPClient(api_url="https://detect.roboflow.com", api_key='7tusGpEEX3t2pAwcL3re')
+# Initialize the Inference client with the API key
+CLIENT = InferenceHTTPClient(api_url="https://detect.roboflow.com", api_key=API_KEY)
 
 # Initialize the FastAPI app
 app = FastAPI()
@@ -80,5 +81,3 @@ async def predict_fire(image: UploadFile = File(...)):
         return JSONResponse(content={"message": "No fire detected in the image."})
 
     return JSONResponse(content={"detections": response})
-
-# To run the app: uvicorn main:app --reload --host 0.0.0.0 --port 8000
