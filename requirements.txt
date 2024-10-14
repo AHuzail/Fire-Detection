@@ -2,3 +2,4 @@ fastapi
 uvicorn[standard]
 Pillow
 inference_sdk
+python-multipart
