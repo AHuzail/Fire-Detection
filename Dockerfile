@@ -1,26 +1,20 @@
 # Use an official Python runtime as a parent image
 FROM python:3.11-slim
 
-# Install required system libraries (including libGL for image handling)
-RUN apt-get update && apt-get install -y \
-    libgl1-mesa-glx \
-    libglib2.0-0 \
-    && rm -rf /var/lib/apt/lists/*
-
-# Set the working directory inside the container
+# Set the working directory in the container
 WORKDIR /app
 
-# Copy the requirements file to the working directory
-COPY ./requirements.txt /app/requirements.txt
+# Copy the requirements file into the container
+COPY requirements.txt .
 
-# Install any needed packages specified in requirements.txt
-RUN pip install --no-cache-dir --upgrade -r /app/requirements.txt
+# Install dependencies
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the rest of the application code to the container
-COPY . /app
+# Copy the rest of the application code into the container
+COPY . .
 
-# Expose port 8000 (FastAPI's default port)
-EXPOSE 8000
+# Expose port 80 to the outside world
+EXPOSE 80
 
-# Command to run the FastAPI app using Uvicorn
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Command to run the FastAPI app with uvicorn
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "80"]
