@@ -1,83 +1,58 @@
-from fastapi import FastAPI, File, UploadFile, HTTPException, Request
-from fastapi.responses import JSONResponse
+import logging
+import time
+from fastapi import FastAPI, UploadFile, File
+from ultralytics import YOLO
 from PIL import Image
 import io
-import time
-import logging
-from functools import wraps
-from inference_sdk import InferenceHTTPClient
-import os
+import json
+# Set up logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
 
-# Get API key from environment variable
-API_KEY = os.getenv("API_KEY", "default_key")
-
-# Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
-
-# Initialize the Inference client with the API key
-CLIENT = InferenceHTTPClient(api_url="https://detect.roboflow.com", api_key=API_KEY)
-
-# Initialize the FastAPI app
 app = FastAPI()
 
+# Load the YOLO model once when the server starts
+model = YOLO("fire_best.pt")
 
-# ====== Decorators ======
-
-def log_request(func):
-    """Logs the details of the incoming request."""
-
-    @wraps(func)
-    async def wrapper(*args, **kwargs):
-        logging.info(f"Processing request: {func.__name__}")
-        return await func(*args, **kwargs)
-
-    return wrapper
-
-
-def measure_time(func):
-    """Measures the time taken to execute a request."""
-
-    @wraps(func)
-    async def wrapper(*args, **kwargs):
-        start_time = time.time()
-        result = await func(*args, **kwargs)
-        elapsed_time = time.time() - start_time
-        logging.info(f"{func.__name__} executed in {elapsed_time:.2f} seconds")
-        return result
-
-    return wrapper
-
-
-def validate_image_format(func):
-    """Validates if the uploaded file is a JPEG or PNG image."""
-
-    @wraps(func)
-    async def wrapper(image: UploadFile = File(...), *args, **kwargs):
-        if image.content_type not in ["image/jpeg", "image/png"]:
-            raise HTTPException(status_code=400, detail="Invalid image format. Only JPEG and PNG are supported.")
-        return await func(image, *args, **kwargs)
-
-    return wrapper
-
-
-# ====== Route with Decorators ======
 
 @app.post("/predict/")
-@log_request
-@measure_time
-@validate_image_format
-async def predict_fire(image: UploadFile = File(...)):
-    # Read the image file
-    contents = await image.read()
-    img = Image.open(io.BytesIO(contents))
+async def predict(file: UploadFile = File(...)):
+    start_time = time.time()  # Start time measurement
+    logger.info("Received file: %s", file.filename)
 
-    # Call the inference client
-    results = CLIENT.infer(img, model_id="fire-detection-new-rc3st/3")
+    try:
+        # Read the image file
+        image_data = await file.read()
+        image = Image.open(io.BytesIO(image_data))
+        result = model.predict(image)
+        xywh = result[0].boxes.xywh
+        conf = result[0].boxes.conf
 
-    # Extract predictions
-    response = results.get('predictions', [])
+        # Extracting values into the specified format
+        output = {
+            "predictions": []
+        }
 
-    if not response:
-        return JSONResponse(content={"message": "No fire detected in the image."})
+        for i in range(xywh.shape[0]):
+            x, y, width, height = xywh[i]
+            confidence = conf[i].item()
+            output["predictions"].append({
+                "x": x.item(),
+                "y": y.item(),
+                "width": width.item(),
+                "height": height.item(),
+                "confidence": confidence
+            })
 
-    return JSONResponse(content={"detections": response})
+        # Convert to JSON string for API response
+        json_output = json.dumps(output, indent=2)
+
+    except Exception as e:
+        logger.error("Error processing file %s: %s", file.filename, e)
+        return {"error": str(e)}
+
+    elapsed_time = time.time() - start_time  # Calculate elapsed time
+    logger.info("Time taken for prediction: %.2f seconds", elapsed_time)
+
+    return {"predictions": output, "time_taken": elapsed_time}
+
