@@ -1,5 +1,6 @@
 fastapi
 uvicorn[standard]
 Pillow
-inference_sdk
+json
+ultralytics
 python-multipart
