@@ -1,6 +1,5 @@
 fastapi
-uvicorn[standard]
-Pillow
-json
+uvicorn
+pillow
 ultralytics
 python-multipart
