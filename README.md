@@ -4,7 +4,7 @@ This API is designed for detecting fire in images using a pre-trained YOLO (You 
 
 ## Deployment
 
-The API is hosted on [Railway](https://railway.app/) and can be accessed via the following link:
+The API is hosted on Railway and can be accessed via the following link:
 - **API URL**: [https://fire-detection-production.up.railway.app/](https://fire-detection-production.up.railway.app/)
 
 ## Features
