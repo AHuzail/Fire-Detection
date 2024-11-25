@@ -29,5 +29,6 @@ Upload an image for fire detection. The endpoint processes the image through the
 
 #### Example Request
 
+
 ```shell
 curl -X POST "https://fire-detection-production.up.railway.app/predict/" -F "file=@path_to_your_image.jpg"
