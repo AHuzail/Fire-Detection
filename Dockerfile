@@ -22,9 +22,21 @@ RUN apt-get update && apt-get install -y \
     libxext6 \
     libxrender-dev
 
+# Create necessary directories
+RUN mkdir -p /app/api /app/app /app/models
+
+# Copy requirements first for better caching
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY . .
+# Copy model and code
+COPY models/fire_best.pt /app/models/
+COPY api/ /app/api/
+COPY app/ /app/app/
+COPY run.py /app/
 
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Expose ports for both FastAPI and Streamlit
+EXPOSE 8000 8501
+
+# Run both servers
+CMD ["python", "run.py"]
