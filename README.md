@@ -42,7 +42,7 @@ Fire-Detection/
 
 1. Clone this repository:
 ```bash
-git clone <repository-url>
+git clone https://github.com/AHuzail/Fire-Detection.git
 cd Fire-Detection
 ```
 
@@ -51,7 +51,6 @@ cd Fire-Detection
 pip install -r requirements.txt
 ```
 
-3. Make sure you have the YOLO model file (`models/fire_best.pt`) in the project directory.
 
 ### Docker Installation
 
@@ -119,12 +118,6 @@ Upload an image file to get fire detection results.
 ```
 
 ### Example API Usage
-
-#### With cURL
-
-```bash
-curl -X POST "http://localhost:8000/predict/" -H "accept: application/json" -H "Content-Type: multipart/form-data" -F "file=@path/to/your/image.jpg"
-```
 
 #### With Python
 
