@@ -2,22 +2,6 @@
 
 A comprehensive system for detecting fire in images using YOLO (You Only Look Once) object detection model, with both REST API and web interface.
 
-## Project Structure
-
-```
-Fire-Detection/
-├── api/                  # FastAPI application
-│   └── main.py           # API entry point
-├── app/                  # Streamlit web application
-│   └── app.py            # Web UI entry point
-├── models/               # Model files
-│   └── fire_best.pt      # YOLO fire detection model
-├── utils/                # Shared utilities
-├── Dockerfile            # Main Dockerfile
-├── docker-compose.yml    # Docker compose configuration
-├── requirements.txt      # Project dependencies
-└── run.py                # Script to run both API and web UI
-```
 
 ## Features
 
@@ -87,58 +71,3 @@ The API server will start on http://localhost:8000
 ```bash
 streamlit run app/app.py
 ```
-
-The Streamlit interface will be available at http://localhost:8501
-
-## API Documentation
-
-### Endpoints
-
-#### POST /predict/
-
-Upload an image file to get fire detection results.
-
-**Request:**
-- Form data with a file field named "file" containing the image (JPEG or PNG format)
-
-**Response:**
-```json
-{
-  "predictions": [
-    {
-      "x": 123.4,
-      "y": 234.5,
-      "width": 100.0,
-      "height": 100.0,
-      "confidence": 0.95
-    }
-  ],
-  "time_taken": 0.45
-}
-```
-
-### Example API Usage
-
-#### With Python
-
-```python
-import requests
-
-url = "http://localhost:8000/predict/"
-files = {"file": open("path/to/your/image.jpg", "rb")}
-response = requests.post(url, files=files)
-print(response.json())
-```
-
-## Web Interface
-
-The Streamlit web interface provides:
-
-- User-friendly image upload interface
-- Visualization of detection results with bounding boxes
-- Confidence scores and detailed metrics for each detection
-- Performance metrics like processing time
-
-## Model Information
-
-The system uses a YOLOv11 model trained specifically for fire detection. The model file (`models/fire_best.pt`) contains pre-trained weights for identifying fire instances in various environments.
